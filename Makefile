@@ -1,57 +1,33 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
+LDFLAGS = -lm
+SRC_DIR = src
+BUILD_DIR = build
 
-# Minimal source files for testing
-SRC = main.c waveforms.c wavheader.c
-OBJ = $(SRC:.c=.o)
+# File comuni
+COMMON_OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/Dft.o $(BUILD_DIR)/waveforms.o $(BUILD_DIR)/wavheader.o
 
-# Executables for different waveforms
-EXECUTABLES = sine square triangle
+# Targets
+all: sine square triangle
 
-# Default target to build all executables
-all: $(EXECUTABLES)
+sine: $(COMMON_OBJS)
+	$(CC) $(CFLAGS) $(COMMON_OBJS) -o $(BUILD_DIR)/sine $(LDFLAGS)
 
-# Rule for sine executable
-sine: CFLAGS += -DSINE_WAVE
-sine: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ -lm  # Add -lm to link the math library
+square: $(COMMON_OBJS)
+	$(CC) $(CFLAGS) $(COMMON_OBJS) -o $(BUILD_DIR)/square $(LDFLAGS)
 
-# Rule for square executable
-square: CFLAGS += -DSQUARE_WAVE
-square: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ -lm  # Add -lm to link the math library
+triangle: $(COMMON_OBJS)
+	$(CC) $(CFLAGS) $(COMMON_OBJS) -o $(BUILD_DIR)/triangle $(LDFLAGS)
 
-# Rule for triangle executable
-triangle: CFLAGS += -DTRIANGLE_WAVE
-triangle: $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ -lm  # Add -lm to link the math library
+# Regole per compilare i .o nella cartella build
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-# Rule for compiling .c files to .o files
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
+# Crea la cartella build se non esiste
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
-# Clean rule
 clean:
-	rm -f $(OBJ) $(EXECUTABLES) *.txt
+	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/sine $(BUILD_DIR)/square $(BUILD_DIR)/triangle
 
-# Run the program for sine
-run_sine:
-	./sine sine sine.wav sine.txt
-
-# Run the program for square
-run_square:
-	./square square square.wav square.txt
-
-# Run the program for triangle
-run_triangle:
-	./triangle triangle triangle.wav triangle.txt
-
-# Plotting rules
-plot_sine:
-	python3 plotwaveform.py sine.txt
-
-plot_square:
-	python3 plotwaveform.py square.txt
-
-plot_triangle:
-	python3 plotwaveform.py triangle.txt
+.PHONY: all clean sine square triangle
