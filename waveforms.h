@@ -14,6 +14,7 @@ typedef struct {
 // Declare waveform generator functions
 double sineFunction(double t, double frequency);
 double squaredFunction(double t, double frequency);
+double triangleFunction(double t, double frequency);
 
 // Accessors
 waveform_info get_waveform_info(const char *type);

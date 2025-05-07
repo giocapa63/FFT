@@ -15,8 +15,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Get the waveform type
-    waveform_func wave = get_waveform(argv[1]);
-    if (wave == NULL) {
+    waveform_info wave_info = get_waveform_info(argv[1]);
+    if (wave_info.func == NULL) {
         printf("Invalid waveform type. Please use sine, square, or triangle.\n");
         return 1;
     }
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     // Generate and write samples
     for (int n = 0; n < total_samples; ++n) {
         double t = (double)n / SAMPLE_RATE;
-        double amplitude = wave(t, FREQUENCY);
+        double amplitude = wave_info.func(t, FREQUENCY);
         int16_t sample = (int16_t)(amplitude * 32767);
 
         // Write amplitude data to .txt
@@ -66,6 +66,17 @@ int main(int argc, char *argv[]) {
     // Close files
     fclose(fp);
     fclose(fwav);
+
+    // Optionally, write the DFT to the dftoutput.txt file
+    double* signal_data = malloc(total_samples * sizeof(double));
+    if (signal_data) {
+        for (int n = 0; n < total_samples; ++n) {
+            signal_data[n] = wave_info.func((double)n / SAMPLE_RATE, FREQUENCY);
+        }
+
+        write_DFT_on_file(signal_data, total_samples, argv[4]);
+        free(signal_data);
+    }
 
     printf("Success\n");
     return 0;

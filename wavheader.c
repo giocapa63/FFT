@@ -1,7 +1,4 @@
-//wavheader.c
-
 #include "wavheader.h"
-
 
 void write_wav_header(FILE *f, int num_samples, uint32_t sample_rate) {
     uint16_t num_channels = 1;
@@ -30,5 +27,3 @@ void write_wav_header(FILE *f, int num_samples, uint32_t sample_rate) {
     fwrite("data", 1, 4, f);
     fwrite(&subchunk2_size, 4, 1, f);
 }
-
-

@@ -45,6 +45,7 @@ run_square:
 # Run the program for triangle
 run_triangle:
 	./triangle triangle triangle.wav triangle.txt
+
 # Plotting rules
 plot_sine:
 	python3 plotwaveform.py sine.txt
