@@ -7,27 +7,25 @@ BUILD_DIR = build
 # File comuni
 COMMON_OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/Dft.o $(BUILD_DIR)/waveforms.o $(BUILD_DIR)/wavheader.o
 
-# Targets
-all: sine square triangle
+# Target executable
+TARGET = $(BUILD_DIR)/wavegen
 
-sine: $(COMMON_OBJS)
-	$(CC) $(CFLAGS) $(COMMON_OBJS) -o $(BUILD_DIR)/sine $(LDFLAGS)
+# Default target
+all: $(TARGET)
 
-square: $(COMMON_OBJS)
-	$(CC) $(CFLAGS) $(COMMON_OBJS) -o $(BUILD_DIR)/square $(LDFLAGS)
+$(TARGET): $(COMMON_OBJS)
+	$(CC) $(CFLAGS) $(COMMON_OBJS) -o $(TARGET) $(LDFLAGS)
 
-triangle: $(COMMON_OBJS)
-	$(CC) $(CFLAGS) $(COMMON_OBJS) -o $(BUILD_DIR)/triangle $(LDFLAGS)
-
-# Regole per compilare i .o nella cartella build
+# Compile object files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Crea la cartella build se non esiste
+# Create the build directory if it doesn't exist
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
+# Clean
 clean:
-	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/sine $(BUILD_DIR)/square $(BUILD_DIR)/triangle
+	rm -rf $(BUILD_DIR)/*.o $(TARGET)
 
-.PHONY: all clean sine square triangle
+.PHONY: all clean

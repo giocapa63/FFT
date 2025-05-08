@@ -10,44 +10,35 @@ PLOTS_DIR="$OUTPUT_DIR/plots"
 TXT_DIR="$OUTPUT_DIR/txt"
 WAV_DIR="$OUTPUT_DIR/wav"
 
-# Create structure (build directory added)
+# Create necessary directories
 mkdir -p "$SRC_DIR" "$BUILD_DIR" "$OUTPUT_DIR" "$DFT_DIR" "$PLOTS_DIR" "$TXT_DIR" "$WAV_DIR"
 
 # Move source files (if they exist)
 mv $FFT_DIR/src/*.c "$SRC_DIR" 2>/dev/null
 mv $FFT_DIR/src/*.h "$SRC_DIR" 2>/dev/null
-mv $FFT_DIR/plotwaveform.py "$SRC_DIR" 2>/dev/null
+mv $FFT_DIR/src/plotwaveform.py "$SRC_DIR" 2>/dev/null
 
-# Navigate to src and compile waveforms
-cd "$SRC_DIR" || exit 1
+# Navigate to root directory and compile the project
+cd "$FFT_DIR" || exit 1
+echo "Running make to compile the project..."
+make
 
-# Compile each waveform program
+# Generate WAV, TXT, and DFT files for each waveform type
 for WAVE in sine square triangle; do
-  echo "Compiling $WAVE..."
-  gcc -Wall -Wextra -std=c99 -D${WAVE^^}_WAVE main.c waveforms.c wavheader.c Dft.c -o "$BUILD_DIR/$WAVE" -lm
-done
+    echo "Generating WAV, TXT, and DFT files for $WAVE..."
+    ./build/wavegen $WAVE "$WAV_DIR/$WAVE.wav" "$TXT_DIR/$WAVE.txt" "$DFT_DIR/${WAVE}_dft.txt"
 
-# Compile DFT module separately if needed
-echo "Compiling DFT module..."
-gcc Dft.c -o "$BUILD_DIR/compute_dft" -lm
+    # Plot waveform
+    echo "Plotting waveform for $WAVE..."
+    python3 "$SRC_DIR/plotwaveform.py" "$TXT_DIR/$WAVE.txt"
+    mv "$TXT_DIR/$WAVE.png" "$PLOTS_DIR/"
 
-# Run waveform generators
-echo "Generating WAV and TXT files..."
-cd "$BUILD_DIR" || exit 1
-for WAVE in sine square triangle; do
-  ./$WAVE $WAVE "$WAV_DIR/$WAVE.wav" "$TXT_DIR/$WAVE.txt"
-done
+    # Plot DFT
+    echo "Plotting DFT for $WAVE..."
+    python3 "$SRC_DIR/plot_dft.py" "$DFT_DIR/${WAVE}_dft.txt"
+    mv "$DFT_DIR/${WAVE}_dft.png" "$PLOTS_DIR/"
 
-# Run DFT computations
-echo "Computing DFT..."
-for WAVE in sine square triangle; do
-  ./compute_dft "$TXT_DIR/$WAVE.txt" "$DFT_DIR/${WAVE}_dft.txt"
-done
-
-# Plot results
-echo "Plotting signals..."
-for WAVE in sine square triangle; do
-  python3 "$SRC_DIR/plotwaveform.py" "$TXT_DIR/$WAVE.txt" "$PLOTS_DIR/$WAVE.png"
+    echo "Files generated for $WAVE."
 done
 
 echo "✅ All tasks completed successfully!"
